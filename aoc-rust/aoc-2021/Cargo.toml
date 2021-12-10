@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 aoc-inputs = { path = "../aoc-inputs" }
+
+anyhow = "1.0"

@@ -12,7 +12,7 @@ pub mod inputs_2021;
 /// # Panics
 ///
 /// If parsing any line fails.
-fn parse_lines<F>(s: impl AsRef<str>) -> Vec<F>
+pub fn parse_lines<F>(s: impl AsRef<str>) -> Vec<F>
 where
     F: FromStr,
     F::Err: Display,
