@@ -9,3 +9,4 @@ edition = "2021"
 aoc-inputs = { path = "../aoc-inputs" }
 
 anyhow = "1.0"
+bitvec = "0.22"

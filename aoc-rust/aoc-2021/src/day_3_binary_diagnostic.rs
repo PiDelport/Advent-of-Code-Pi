@@ -2,20 +2,55 @@
 //!
 //! <https://adventofcode.com/2021/day/3>
 
-pub mod input_1 {
-    //! For part 1, interpret each line as a list of weights.
-    //!
-    //! TODO: Look at changing this to a matrix representation,
-    //!       to simplify summing the columns.
+pub mod input {
+    //! Parse input lines to [`bitvec`] values.
 
-    use std::ops::Deref;
     use std::str::FromStr;
 
     use anyhow::anyhow;
+    use bitvec::prelude::{BitBox, BitVec};
+
+    #[repr(transparent)]
+    pub struct ParseBits(pub BitBox);
+
+    /// ```
+    /// # use aoc_2021::day_3_binary_diagnostic::input::ParseBits;
+    ///
+    /// let ParseBits(bits) = "10101".parse().unwrap();
+    /// assert_eq!(bits.to_string(), "[10101]")
+    /// ```
+    impl FromStr for ParseBits {
+        type Err = anyhow::Error;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            s.chars()
+                .map(|c| match c {
+                    '0' => Ok(false),
+                    '1' => Ok(true),
+                    invalid => Err(anyhow!("Invalid bit: {invalid:?}")),
+                })
+                // Unlike Box<[T]>, BitBox doesn't implement FromIterator,
+                // so we collect as BitVec and convert to BitBox.
+                .collect::<Result<BitVec, Self::Err>>()
+                .map(BitBox::from)
+                .map(Self)
+        }
+    }
+}
+
+pub mod part_1_weights {
+    //! For part 1, interpret bits as weights to sum, column-wise.
+    //!
+    //! TODO: Look at changing this to a matrix representation, for simpler code?
+
+    use std::iter::{zip, Sum};
+    use std::ops::{Add, Deref};
+
+    use bitvec::prelude::BitSlice;
 
     pub type Weight = i32;
 
-    #[derive(Debug)]
+    #[repr(transparent)]
     pub struct Weights(pub Box<[Weight]>);
 
     impl Weights {
@@ -32,33 +67,26 @@ pub mod input_1 {
         }
     }
 
-    impl FromStr for Weights {
-        type Err = anyhow::Error;
-
-        fn from_str(s: &str) -> Result<Self, Self::Err> {
-            let slice = s
-                .chars()
-                .map(|c| match c {
-                    '0' => Ok(-1),
-                    '1' => Ok(1),
-                    invalid => Err(anyhow!("Invalid bit value: {invalid:?}")),
-                })
-                .collect::<Result<Box<[Weight]>, Self::Err>>()?;
-            Ok(Self(slice))
+    /// ```
+    /// # use aoc_2021::day_3_binary_diagnostic::part_1_weights::Weights;
+    /// use bitvec::prelude::*;
+    ///
+    /// let Weights(weights) = bits![1,0,1,0,1].into();
+    /// assert_eq!(format!("{:?}", weights), "[1, -1, 1, -1, 1]")
+    /// ```
+    impl From<&BitSlice> for Weights {
+        fn from(bits: &BitSlice) -> Self {
+            Self(
+                bits.iter()
+                    .by_val()
+                    .map(|bit| match bit {
+                        false => (-1),
+                        true => (1),
+                    })
+                    .collect::<Box<[Weight]>>(),
+            )
         }
     }
-}
-
-pub mod part_1 {
-    use std::iter::{zip, Sum};
-    use std::ops::Add;
-
-    use anyhow::{anyhow, Context};
-
-    use super::input_1::*;
-
-    /// The gamma / epsilon rate.
-    pub type Rate = u64;
 
     impl Add for &Weights {
         type Output = Weights;
@@ -88,14 +116,25 @@ pub mod part_1 {
             iter.fold(init, |acc, r| &acc + r)
         }
     }
+}
 
-    /// Sum a collection of report weights to their combined value.
+pub mod part_1 {
+
+    use anyhow::{anyhow, Context};
+    use bitvec::boxed::BitBox;
+
+    use super::part_1_weights::{Weight, Weights};
+
+    pub type GammaRate = u64;
+    pub type EpsilonRate = u64;
+
+    /// Sum a collection of report weights column-wise, to a combined value.
     pub fn combine_weights(report: &[Weights]) -> Weights {
         report.iter().sum()
     }
 
-    /// Determine the gamma rate bit value for a single weight.
-    fn gamma_bit_value(weight: Weight) -> anyhow::Result<Rate> {
+    /// Determine the gamma rate bit value for a single combined weight.
+    fn gamma_bit_value(weight: Weight) -> anyhow::Result<GammaRate> {
         match weight.signum() {
             -1 => Ok(0),
             1 => Ok(1),
@@ -105,8 +144,8 @@ pub mod part_1 {
     }
 
     /// Determine the rates.
-    pub fn gamma_epsilon_rates(weights: &Weights) -> anyhow::Result<(Rate, Rate)> {
-        let init: anyhow::Result<Rate> = Ok(0);
+    pub fn gamma_epsilon_rates(weights: &Weights) -> anyhow::Result<(GammaRate, EpsilonRate)> {
+        let init: anyhow::Result<GammaRate> = Ok(0);
         let gamma = weights
             .iter()
             .map(|&w| gamma_bit_value(w))
@@ -127,6 +166,17 @@ pub mod part_1 {
 
         Ok((gamma, epsilon))
     }
+
+    /// Decode a full report into the two rate values.
+    pub fn decode_report(report: &[BitBox]) -> anyhow::Result<(GammaRate, EpsilonRate)> {
+        let weights = report
+            .iter()
+            .map(|bits| Weights::from(bits.as_bitslice()))
+            .collect::<Box<[Weights]>>();
+
+        let combined = &combine_weights(&weights);
+        gamma_epsilon_rates(combined)
+    }
 }
 
 pub mod part_2 {
@@ -137,30 +187,36 @@ pub mod part_2 {
 mod tests {
     use aoc_inputs::inputs_2021::day_3::{EXAMPLE, INPUT};
     use aoc_inputs::parse_lines;
+    use bitvec::boxed::BitBox;
 
-    use super::input_1::*;
+    use super::input::*;
     use super::part_1::*;
     // use super::part_2::*;
 
-    fn part_1(report: &[Weights]) -> Rate {
-        let combined = &combine_weights(report);
-        let (gamma, epsilon) = gamma_epsilon_rates(combined).unwrap();
-        Rate::checked_mul(gamma, epsilon).unwrap_or_else(|| panic!("overflow: {gamma} * {epsilon}"))
+    pub fn part_1(report: &[BitBox]) -> u64 {
+        let (gamma, epsilon) = decode_report(report).unwrap();
+        u64::checked_mul(gamma, epsilon).unwrap_or_else(|| panic!("overflow: {gamma} * {epsilon}"))
     }
 
-    fn part_2(_: &[Weights]) -> u32 {
+    fn part_2(_: &[BitBox]) -> u32 {
         todo!()
     }
 
     #[test]
     fn test_part_1() {
-        assert_eq!(part_1(&parse_lines(EXAMPLE)), 198);
-        assert_eq!(part_1(&parse_lines(INPUT)), 3882564);
+        assert_eq!(part_1(&unwrap_bits(parse_lines(EXAMPLE))), 198);
+        assert_eq!(part_1(&unwrap_bits(parse_lines(INPUT))), 3882564);
     }
 
     #[test]
+    #[ignore]
     fn test_part_2() {
-        assert_eq!(part_2(&parse_lines(EXAMPLE)), 230);
-        assert_eq!(part_2(&parse_lines(INPUT)), 0);
+        assert_eq!(part_2(&unwrap_bits(parse_lines(EXAMPLE))), 230);
+        assert_eq!(part_2(&unwrap_bits(parse_lines(INPUT))), 0);
+    }
+
+    /// XXX: Unwrap the [`ParseBits`] newtype.
+    fn unwrap_bits(report: Vec<ParseBits>) -> Vec<BitBox> {
+        report.into_iter().map(|ParseBits(bits)| bits).collect()
     }
 }
