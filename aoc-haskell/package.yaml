@@ -1,0 +1,16 @@
+name: aoc-haskell
+
+# language: GHC2021
+ghc-options: -Wall
+
+dependencies:
+  - base
+
+library:
+  source-dirs: src
+
+tests:
+  aoc-test:
+    main: Main.hs
+    source-dirs: test
+    dependencies: aoc-haskell
