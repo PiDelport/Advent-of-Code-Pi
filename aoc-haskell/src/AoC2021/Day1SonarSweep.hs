@@ -1,3 +1,5 @@
+-- https://adventofcode.com/2021/day/1
+
 module AoC2021.Day1SonarSweep
   ( part1
   , part2A
