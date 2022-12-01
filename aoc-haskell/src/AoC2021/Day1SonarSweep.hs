@@ -10,8 +10,11 @@ import           Data.List                      ( scanl'
                                                 , tails
                                                 )
 
-part1 :: [Int] -> Int
-part1 = countIncreases
+parseInput :: String -> [Int]
+parseInput = map read . lines
+
+part1 :: String -> Int
+part1 = countIncreases . parseInput
 
 -- >>> deltas [1,2,4,2,3]
 -- [1,2,-2,1]
@@ -41,8 +44,8 @@ slidingWindows w = takeWhile ((w ==) . length) . map (take w) . tails
 slidingWindowSums :: Num a => Int -> [a] -> [a]
 slidingWindowSums w = map sum . slidingWindows w
 
-part2A :: [Int] -> Int
-part2A = countIncreases . slidingWindowSums 3
+part2A :: String -> Int
+part2A = countIncreases . slidingWindowSums 3 . parseInput
 
 -- However, we can be more clever:
 --
@@ -69,5 +72,5 @@ slidingWindowSums' w ns = scanl' update (sum firstWindow) edges
 
   update windowSum (l, r) = windowSum - l + r
 
-part2B :: [Int] -> Int
-part2B = countIncreases . slidingWindowSums' 3
+part2B :: String -> Int
+part2B = countIncreases . slidingWindowSums' 3 . parseInput

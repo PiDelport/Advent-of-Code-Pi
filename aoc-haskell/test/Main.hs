@@ -34,22 +34,16 @@ test2021 = do
 
 -- Check one part of day's puzzle against the example and real input.
 checkPart
-  :: (Read a, Eq b, Show b)
-  => InputYear
-  -> InputDay
-  -> ([a] -> b)
-  -> b
-  -> b
-  -> IO ()
+  :: (Eq a, Show a) => InputYear -> InputDay -> (String -> a) -> a -> a -> IO ()
 checkPart year day f exampleResult inputResult = do
   checkCase f (inputBase ++ "example") exampleResult
   checkCase f (inputBase ++ "input")   inputResult
   where inputBase = show year ++ "/day-" ++ show day ++ "/"
 
 -- Check one test case.
-checkCase :: (Read a, Eq b, Show b) => ([a] -> b) -> InputName -> b -> IO ()
+checkCase :: (Eq a, Show a) => (String -> a) -> InputName -> a -> IO ()
 checkCase f inputName expected = do
-  input <- readInput inputName
+  input <- readFile ("../aoc-input-files/" ++ inputName ++ ".txt")
   let result = f input
   let message =
         "💥 check "
@@ -59,8 +53,3 @@ checkCase f inputName expected = do
           ++ ", got "
           ++ show result
   unless (result == expected) (throwIO $ AssertionFailed message)
-
--- Read an input file, parsing each line.
-readInput :: Read a => InputName -> IO [a]
-readInput inputName =
-  map read . lines <$> readFile ("../aoc-input-files/" ++ inputName ++ ".txt")

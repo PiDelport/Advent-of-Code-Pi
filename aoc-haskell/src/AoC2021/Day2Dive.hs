@@ -8,6 +8,7 @@ module AoC2021.Day2Dive
   ) where
 
 import           Data.Foldable                  ( foldl' )
+import           Data.Maybe                     ( fromJust )
 import           Text.Read                      ( readMaybe )
 
 -- Let's use newtypes for the depth and horizontal position:
@@ -35,8 +36,8 @@ parseCommand s = case words s of
   ["up"     , n] -> Up . Depth <$> readMaybe n
   _              -> Nothing
 
-instance Read Command where
-  readsPrec _ s = [ (c, "") | Just c <- [parseCommand s] ]
+parseInput :: String -> Maybe [Command]
+parseInput = traverse parseCommand . lines
 
 -- Evaluate one command on the state.
 --
@@ -52,8 +53,8 @@ step (h, d) c = case c of
 part1' :: [Command] -> Position
 part1' = foldl' step (0, 0)
 
-part1 :: [Command] -> Int
-part1 = answer . part1'
+part1 :: String -> Int
+part1 = answer . part1' . fromJust . parseInput
 
 answer :: Position -> Int
 answer (HPos h, Depth d) = d * h
