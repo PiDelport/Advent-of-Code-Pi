@@ -1,9 +1,13 @@
 module AoC2022.Day1CalorieCounting
   ( part1
+  , part2
   ) where
 
 import           Control.Applicative            ( Alternative(..) )
-import           Data.List                      ( unfoldr )
+import           Data.List                      ( sortOn
+                                                , unfoldr
+                                                )
+import           Data.Ord                       ( Down(..) )
 
 -- Each elf's inventory is a list of item calories.
 
@@ -31,6 +35,11 @@ parseInput = map (map read) . spans (not . null) . lines
 
 part1 :: String -> Calories
 part1 = maximum . map sum . parseInput
+
+-- For Part 2, we can sort to get the top three.
+
+part2 :: String -> Calories
+part2 = sum . take 3 . sortOn Down . map sum . parseInput
 
 
 -- Appendix: Well-known helpers

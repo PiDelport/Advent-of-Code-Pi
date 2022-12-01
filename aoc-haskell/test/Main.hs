@@ -38,6 +38,7 @@ test2021 = do
 test2022 :: IO ()
 test2022 = do
   check 1 AoC2022.Day1CalorieCounting.part1 24000 68787
+  check 1 AoC2022.Day1CalorieCounting.part2 45000 198041
   where check = checkPart 2022
 
 -- Check one part of day's puzzle against the example and real input.
