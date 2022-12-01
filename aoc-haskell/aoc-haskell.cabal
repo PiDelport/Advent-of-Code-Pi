@@ -12,6 +12,7 @@ library
   exposed-modules:
       AoC2021.Day1SonarSweep
       AoC2021.Day2Dive
+      AoC2022.Day1CalorieCounting
   other-modules:
       Paths_aoc_haskell
   hs-source-dirs:

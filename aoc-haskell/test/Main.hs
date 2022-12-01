@@ -7,6 +7,8 @@ module Main
 import qualified AoC2021.Day1SonarSweep
 import qualified AoC2021.Day2Dive
 
+import qualified AoC2022.Day1CalorieCounting
+
 import           Control.Exception              ( AssertionFailed(..)
                                                 , throwIO
                                                 )
@@ -21,6 +23,7 @@ type InputDay = Int
 main :: IO ()
 main = do
   test2021
+  test2022
   putStrLn "🎄️ Success!"
 
 test2021 :: IO ()
@@ -31,6 +34,11 @@ test2021 = do
 
   check 2 AoC2021.Day2Dive.part1        150 1990000
   where check = checkPart 2021
+
+test2022 :: IO ()
+test2022 = do
+  check 1 AoC2022.Day1CalorieCounting.part1 24000 68787
+  where check = checkPart 2022
 
 -- Check one part of day's puzzle against the example and real input.
 checkPart
