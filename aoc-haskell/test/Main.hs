@@ -8,6 +8,7 @@ import qualified AoC2021.Day1SonarSweep
 import qualified AoC2021.Day2Dive
 
 import qualified AoC2022.Day1CalorieCounting
+import qualified AoC2022.Day2RockPaperScissors
 
 import           Control.Exception              ( AssertionFailed(..)
                                                 , throwIO
@@ -38,8 +39,10 @@ test2021 = do
 
 test2022 :: IO ()
 test2022 = do
-  check 1 AoC2022.Day1CalorieCounting.part1 24000 68787
-  check 1 AoC2022.Day1CalorieCounting.part2 45000 198041
+  check 1 AoC2022.Day1CalorieCounting.part1   24000 68787
+  check 1 AoC2022.Day1CalorieCounting.part2   45000 198041
+
+  check 2 AoC2022.Day2RockPaperScissors.part1 15    13052
   where check = checkPart 2022
 
 -- Check one part of day's puzzle against the example and real input.
