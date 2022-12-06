@@ -33,6 +33,7 @@ test2021 = do
   check 1 AoC2021.Day1SonarSweep.part2B 5   1429
 
   check 2 AoC2021.Day2Dive.part1        150 1990000
+  check 2 AoC2021.Day2Dive.part2        900 1975421260
   where check = checkPart 2021
 
 test2022 :: IO ()
