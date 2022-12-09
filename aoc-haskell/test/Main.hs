@@ -10,6 +10,7 @@ import qualified AoC2021.Day2Dive
 import qualified AoC2022.Day1CalorieCounting
 import qualified AoC2022.Day2RockPaperScissors
 import qualified AoC2022.Day3RucksackReorganization
+import qualified AoC2022.Day4CampCleanup
 
 import           Control.Exception              ( AssertionFailed(..)
                                                 , throwIO
@@ -46,6 +47,8 @@ test2022 = do
   check 2 AoC2022.Day2RockPaperScissors.part1      15    13052
 
   check 3 AoC2022.Day3RucksackReorganization.part1 157   7737
+
+  check 4 AoC2022.Day4CampCleanup.part1            2     485
   where check = checkPart 2022
 
 -- Check one part of day's puzzle against the example and real input.

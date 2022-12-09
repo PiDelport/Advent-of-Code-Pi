@@ -16,6 +16,7 @@ library
       AoC2022.Day1CalorieCounting
       AoC2022.Day2RockPaperScissors
       AoC2022.Day3RucksackReorganization
+      AoC2022.Day4CampCleanup
   other-modules:
       Paths_aoc_haskell
   hs-source-dirs:
