@@ -3,11 +3,10 @@ module AoC2022.Day1CalorieCounting
   , part2
   ) where
 
-import           Control.Applicative            ( Alternative(..) )
-import           Data.List                      ( sortOn
-                                                , unfoldr
-                                                )
+import           Data.List                      ( sortOn )
 import           Data.Ord                       ( Down(..) )
+
+import           AoC2022.Commons                ( paragraphs )
 
 -- Each elf's inventory is a list of item calories.
 
@@ -16,22 +15,12 @@ type Inventory = [Calories]
 
 -- * Parsing
 
--- We can split a list into continuous spans that satisfy a predicate.
-
--- >>> spans (0 <) [0,1,2,0,3,4,5,0]
--- [[1,2],[3,4,5]]
-spans :: (a -> Bool) -> [a] -> [[a]]
-spans p = unfoldr $ guarded (not . null . fst) . span p . dropWhile (not . p)
-
-guarded :: Alternative f => (a -> Bool) -> a -> f a
-guarded p a = if p a then pure a else empty
-
--- Use this to group and parse input lines into inventories.
+-- Group and parse input lines into inventories.
 
 -- >>> parseInput $ unlines ["1","2","","3","4","5"]
 -- [[1,2],[3,4,5]]
 parseInput :: String -> [Inventory]
-parseInput = map (map read) . spans (not . null) . lines
+parseInput = map (map read) . paragraphs
 
 part1 :: String -> Calories
 part1 = maximum . map sum . parseInput
@@ -40,6 +29,3 @@ part1 = maximum . map sum . parseInput
 
 part2 :: String -> Calories
 part2 = sum . take 3 . sortOn Down . map sum . parseInput
-
-
--- Appendix: Well-known helpers
