@@ -52,6 +52,7 @@ test2022 = do
   check 4 AoC2022.Day4CampCleanup.part1            2     485
 
   check 5 AoC2022.Day5SupplyStacks.part1           "CMZ" "FZCMJCRHZ"
+  check 5 AoC2022.Day5SupplyStacks.part2           "MCD" "JSDHQMZGF"
   where check = checkPart 2022
 
 -- Check one part of day's puzzle against the example and real input.
